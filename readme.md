@@ -1,4 +1,5 @@
-A GUI app written in RUST to study / demo how UDP and TCP works
+A GUI app written in RUST to study / demo how UDP and TCP works  
+you can use this app when you want to listen to or send some traffic quickly to network
 
 ![main_gui](assets/demo1.png)
 
