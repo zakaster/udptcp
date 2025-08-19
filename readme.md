@@ -1,0 +1,28 @@
+A GUI app written in RUST to study / demo how UDP and TCP works
+
+# Use the APP
+build and run the app by double clicking
+the scripts are used to start / stop multiple instances
+so that we can run tests on a single computer
+
+this by default starts 4 instances
+```bash
+./start_many.sh
+./stop_many.sh
+```
+
+or use parameters
+```bash
+./start_many.sh [count]
+./stop_many.sh
+```
+`count` should be >= 1
+
+by default the script builds the app in debug mode
+to build in release mode use `--release` flag
+```bash
+./start_many.sh --release
+./stop_many.sh
+```
+
+

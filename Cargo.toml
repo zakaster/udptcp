@@ -1,0 +1,12 @@
+[package]
+name = "udptcp"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+eframe = "0.31.1"
+get_if_addrs = "0.5.3"
+netdev = "0.30"
+chrono = "0.4"
+hex = "0.4"
+log = "0.4"

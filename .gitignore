@@ -1,0 +1,8 @@
+# rust project build files
+/target/
+
+# macos specific
+.DS_Store
+
+# don't ignore the `.gitignore` file itself
+!.gitignore
