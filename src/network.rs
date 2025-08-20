@@ -68,7 +68,7 @@ impl Netif {
 
                 // this is to filter utun4 on mac which is considered not physical
                 // notice localhost is also not physical which we'd like to keep
-                if !ipv4.addr.is_loopback() && !iface.is_physical() {
+                if !ipv4.addr.is_loopback() && !iface.is_physical() || !iface.is_up() {
                     continue;
                 }
 

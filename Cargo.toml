@@ -10,4 +10,3 @@ netdev = "0.30"
 chrono = "0.4"
 hex = "0.4"
 log = "0.4"
-windows = { version = "0.58", features = ["Win32_System_Console"] }

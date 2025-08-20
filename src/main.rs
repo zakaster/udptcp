@@ -67,19 +67,12 @@ struct App {
 impl App {
     fn new() -> Self {
         let logrx = Xlogger::init();
-        log::info!(">>> starting app {} <<<", chrono::Local::now());
-
-        // let (cmdtx, cmdrx) = mpsc::channel();
+        log::info!(">>> 走你 starting app {} <<<", chrono::Local::now());
 
         let mut app = Self {
             netif_vec: Netif::get_local_netif(),
             netif_selected: 0,
 
-            // local_ip: String::new(),
-            // local_port: "0".to_string(),
-            // broadcast_ip: String::new(),
-            // remote_ip: String::new(),
-            // remote_port: "0".to_string(),
             local_ip: String::default(),
             local_port_udp: String::default(),
             broadcast_ip_udp: String::default(),
@@ -776,15 +769,6 @@ impl eframe::App for App {
 }
 
 fn main() -> eframe::Result<()> {
-    #[cfg(target_os = "windows")]
-    {
-        unsafe {
-            use windows::Win32::System::Console::{SetConsoleCP, SetConsoleOutputCP};
-            SetConsoleCP(65001);
-            SetConsoleOutputCP(65001);
-        }
-    }
-
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size((1114.0, 588.0)) // default size
