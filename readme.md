@@ -31,4 +31,8 @@ to build in release mode use `--release` flag
 ```
 
 # Some notes
-the UDP broadcast feature is not fully tested
+the UDP broadcast feature is not fully tested  
+some network interface names (eg. WIFI) is not showing up correctly on windows  
+sending raw bytes (eg. hex) is not supported now
+
+

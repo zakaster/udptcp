@@ -1,22 +1,19 @@
+//! xx
+//! version: 0.1.0
+
+use get_if_addrs::{IfAddr, get_if_addrs};
 use std::fmt;
 use std::net::Ipv4Addr;
 
-/// mod version 0.1
-use get_if_addrs::{IfAddr, get_if_addrs};
-
 /*
-
    some notes
        Ipv4Addr::LOCALHOST == 127.0.0.1
-
-
 
        Ipv4Addr::Unspecified == 0.0.0.0
             - also known as `INADDR_ANY`
             - can be binded as local address
             - means to accept all traffic
             - cannot be used as remote
-
 */
 
 #[derive(Debug)]
@@ -56,7 +53,7 @@ impl Netif {
 
     /// netdev approach
     /// ### if_physical
-    /// does not work for awdl, llw and anpi interfaces
+    /// does not work for interfaces like awdl, llw and anpi
     /// even all of them has no valid ipv4 address, and most
     /// of them are is_up == true
     /// utun (VM) is recogonized as if_physical == false
@@ -69,12 +66,17 @@ impl Netif {
             if !iface.ipv4.is_empty() {
                 let ipv4 = iface.ipv4[0];
 
-                // this is for filter utun4 on mac
-                // which is considered as not physical
-                // but localhost is also not physical
+                // this is to filter utun4 on mac which is considered not physical
+                // notice localhost is also not physical which we'd like to keep
                 if !ipv4.addr.is_loopback() && !iface.is_physical() {
                     continue;
                 }
+
+                // test code for names
+                // iface.name does not show `en0` on windows but some long ID
+                // todo resolve this later
+                dbg!(&iface.name);
+                dbg!(&iface.friendly_name);
 
                 res.push(Netif {
                     name: iface.name,
@@ -88,7 +90,7 @@ impl Netif {
             }
         }
 
-        // manually insert the INADDR_ANY
+        // manually insert the INADDR_ANY (0.0.0.0)
         res.push(Netif {
             name: "INADDR_ANY".to_string(),
             ip: Ipv4Addr::UNSPECIFIED,
@@ -97,7 +99,6 @@ impl Netif {
         res
     }
 
-    /// deprecated
     /// get_if_addrs version
     /// netif names are GUIDs on windows (ok on mac) which is not friendly
     /// return empty vec in case of failure retrive
@@ -143,12 +144,11 @@ impl Netif {
         name.starts_with("ipsec") // IPsec tunnel
     }
 
-    /// deprecated
     /// netdev approach
     /// the friendly_name is not working well for mac
     /// no name info for localhost, the name en0 is now "WI-F"
     #[allow(unused)]
-    #[deprecated = "old approach"]
+    #[deprecated = "old approach using netdev"]
     fn get_local_netif_old2() -> Vec<Netif> {
         let mut res = vec![];
         let ifaces = netdev::get_interfaces();
