@@ -776,6 +776,15 @@ impl eframe::App for App {
 }
 
 fn main() -> eframe::Result<()> {
+    #[cfg(target_os = "windows")]
+    {
+        unsafe {
+            use windows::Win32::System::Console::{SetConsoleCP, SetConsoleOutputCP};
+            SetConsoleCP(65001);
+            SetConsoleOutputCP(65001);
+        }
+    }
+
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size((1114.0, 588.0)) // default size
