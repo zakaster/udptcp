@@ -72,14 +72,26 @@ impl Netif {
                     continue;
                 }
 
-                // test code for names
-                // iface.name does not show `en0` on windows but some long ID
-                // todo resolve this later
-                dbg!(&iface.name);
-                dbg!(&iface.friendly_name);
+                // test code
+                // dbg!(&iface.name);  // works for macos
+                // dbg!(&iface.friendly_name); // works for windows but it is an option
+                let name = {
+                    #[cfg(target_os = "windows")]
+                    {
+                        match iface.friendly_name {
+                            Some(n) => n,
+                            None => iface.name,
+                        }
+                    }
+
+                    #[cfg(not(target_os = "windows"))]
+                    {
+                        iface.name
+                    }
+                };
 
                 res.push(Netif {
-                    name: iface.name,
+                    name,
                     ip: ipv4.addr,
                     bc: if ipv4.addr.is_loopback() {
                         None
