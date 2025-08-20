@@ -779,7 +779,7 @@ fn main() -> eframe::Result<()> {
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size((1114.0, 588.0)) // default size
-            .with_position(egui::pos2(1929.0, 48.0)) // on right side monitor
+            // .with_position(egui::pos2(1929.0, 48.0)) // on right side monitor, only for dev
             .with_title("UDP TCP"), // higher priority if set
 
         ..Default::default()
