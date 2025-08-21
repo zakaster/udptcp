@@ -1,5 +1,5 @@
-//! xx
-//! version: 0.1.0
+//! version: 0.1.1
+//! fixed the network interface name issue in both pc and mac
 
 use get_if_addrs::{IfAddr, get_if_addrs};
 use std::fmt;
@@ -25,11 +25,11 @@ pub struct Netif {
 
 impl fmt::Display for Netif {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Some(bc) = self.bc {
-            write!(f, "{} - {} ( bc = {} )", self.name, self.ip, bc)
-        } else {
-            write!(f, "{} - {}", self.name, self.ip)
-        }
+        write!(
+            f,
+            "{} - {} ( broadcast address = {:?} )",
+            self.ip, self.name, self.bc
+        )
     }
 }
 

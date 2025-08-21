@@ -336,19 +336,14 @@ impl App {
                                         )
                                         .clicked()
                                     {
-                                        match self.udp.toggle_broadcast(self.udp_bc) {
-                                            Ok(()) => {
-                                                log::info!("broadcast set to {}", self.udp_bc)
-                                            }
-                                            Err(e) => {
-                                                log::error!(
-                                                    "failed to set broadcast to {}, err = {e}",
-                                                    self.udp_bc
-                                                );
+                                        if let Err(e) = self.udp.toggle_broadcast(self.udp_bc) {
+                                            log::error!(
+                                                "failed to set broadcast to {}, err = {e}",
+                                                self.udp_bc
+                                            );
 
-                                                // revert in case of failure
-                                                self.udp_bc = !self.udp_bc;
-                                            }
+                                            // revert in case of failure
+                                            self.udp_bc = !self.udp_bc;
                                         }
                                     }
                                     ui.end_row();

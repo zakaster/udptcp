@@ -5,8 +5,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
-// customs
-
 /*
     udp runs in blocking mode
 
@@ -41,7 +39,11 @@ pub struct Udp {
     // there's no udpsocket, so we must wrap it with option
     // and this way it makes GUI code more complicated
     socket: Option<Arc<UdpSocket>>,
+
     is_running: Arc<AtomicBool>,
+
+    // this is not actual state but desired value from GUI
+    bc: bool,
 
     // event_tx: Sender<UpdWorkerEvent>,
     // event_rx: Receiver<UpdWorkerEvent>,
@@ -50,12 +52,10 @@ pub struct Udp {
 
 impl Default for Udp {
     fn default() -> Self {
-        // let (event_tx, event_rx) = mpsc::channel();
         Udp {
             socket: None,
             is_running: Arc::new(AtomicBool::new(false)),
-            // event_tx,
-            // event_rx,
+            bc: false,
             worker: None,
         }
     }
@@ -91,7 +91,7 @@ impl Udp {
     fn connect(&mut self, sockaddr: String) -> io::Result<String> {
         let socket = UdpSocket::bind(sockaddr)?;
 
-        // read timeout is used instead of non-blocking mode
+        socket.set_broadcast(self.bc)?;
         socket.set_read_timeout(Some(READ_TIMEOUT))?;
 
         let port = socket.local_addr()?.port().to_string();
@@ -146,12 +146,21 @@ impl Udp {
                     {
                         // do nothing
                     }
+
+                    // other errors, for example
+                    // sending to an valid address + invalid (not used) port will get
+                    // An existing connection was forcibly closed by the remote host. (os error 10054)
+                    // also, no need to exit the thread in case of receiving error
                     Err(e) => {
                         log::error!("receiving error: {e}");
-                        break;
                     }
                 }
             }
+            // in theory the app should never reach here
+            // udp worker thread can and should be closed only by
+            // pressing the GUI button which calls disconnect()
+            // if somehow this line is reached then we have a
+            // problem of not releasing the socket
             log::debug!("UDP worker loop ended");
         });
 
