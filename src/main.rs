@@ -348,7 +348,8 @@ impl App {
                                     }
                                     ui.end_row();
 
-                                    ui.label("Manual Broadcast Address");
+                                    ui.label("Manual Broadcast Address")
+                                        .on_hover_text("Optional\nwill override the default broadcast address if not empty");
                                     ui.add(
                                         egui::TextEdit::singleline(
                                             &mut self.broadcast_ip_manual_udp,
