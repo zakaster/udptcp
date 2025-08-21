@@ -67,7 +67,7 @@ struct App {
 impl App {
     fn new() -> Self {
         let logrx = Xlogger::init();
-        log::info!(">>> 走你 starting app {} <<<", chrono::Local::now());
+        log::info!(">>> starting app {} <<<", chrono::Local::now());
 
         let mut app = Self {
             netif_vec: Netif::get_local_netif(),
@@ -768,18 +768,113 @@ impl eframe::App for App {
     }
 }
 
+/// patch
+/// Try to locate a system CJK font cross‑platform and install as fallback for both families.
+/// cjk = chinese, japanese, korean
+fn install_cjk_fallback(ctx: &egui::Context) {
+    use std::{env, fs, path::PathBuf, sync::Arc};
+
+    fn candidates() -> Vec<PathBuf> {
+        // Highest priority: explicit override
+        let mut paths = env::var_os("UDPTCP_CJK_FONT")
+            .map(|p| vec![PathBuf::from(p)])
+            .unwrap_or_default();
+
+        // OS-specific guesses
+        #[cfg(target_os = "windows")]
+        {
+            paths.extend(
+                [
+                    r"C:\Windows\Fonts\msyh.ttc", // Microsoft YaHei
+                    r"C:\Windows\Fonts\msyh.ttf",
+                    r"C:\Windows\Fonts\msjh.ttc", // Microsoft JhengHei (TC)
+                    r"C:\Windows\Fonts\simhei.ttf", // SimHei
+                    r"C:\Windows\Fonts\simsun.ttc", // SimSun
+                ]
+                .into_iter()
+                .map(PathBuf::from),
+            );
+        }
+        #[cfg(target_os = "macos")]
+        {
+            paths.extend(
+                [
+                    "/System/Library/Fonts/PingFang.ttc",         // PingFang SC
+                    "/System/Library/Fonts/STHeiti Light.ttc",    // Heiti
+                    "/System/Library/Fonts/Songti.ttc",           // Songti
+                    "/System/Library/Fonts/Hiragino Sans GB.ttc", // Some macOS builds
+                ]
+                .into_iter()
+                .map(PathBuf::from),
+            );
+        }
+        #[cfg(all(unix, not(target_os = "macos")))]
+        {
+            paths.extend(
+                [
+                    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+                    "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
+                    "/usr/share/fonts/opentype/noto/NotoSansCJKSC-Regular.otf",
+                    "/usr/share/fonts/opentype/noto/NotoSansCJK.ttc",
+                    "/usr/share/fonts/opentype/source-han-sans/SourceHanSansCN-Regular.otf",
+                    "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
+                ]
+                .into_iter()
+                .map(PathBuf::from),
+            );
+        }
+        paths
+    }
+
+    let mut fonts = egui::FontDefinitions::default();
+
+    let mut installed = false;
+    for path in candidates() {
+        if let Ok(bytes) = fs::read(&path) {
+            let key = format!("CJKFallback({})", path.display());
+            fonts
+                .font_data
+                .insert(key.clone(), Arc::new(egui::FontData::from_owned(bytes)));
+            // Add as fallback for both families (monospace first to satisfy .monospace() usage)
+            fonts
+                .families
+                .entry(egui::FontFamily::Monospace)
+                .or_default()
+                .push(key.clone());
+            fonts
+                .families
+                .entry(egui::FontFamily::Proportional)
+                .or_default()
+                .push(key.clone());
+            installed = true;
+            break;
+        }
+    }
+
+    if !installed {
+        log::warn!(
+            "No system CJK font found. Set UDPTCP_CJK_FONT=/path/to/font.(ttc|ttf|otf) to override."
+        );
+    }
+
+    ctx.set_fonts(fonts);
+}
+
 fn main() -> eframe::Result<()> {
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size((1114.0, 588.0)) // default size
-            // .with_position(egui::pos2(1929.0, 48.0)) // on right monitor, only for dev
-            .with_title("UDP TCP"), // higher priority if set
-
+            .with_inner_size((1114.0, 588.0))
+            .with_title("UDP TCP"),
         ..Default::default()
     };
     eframe::run_native(
         "default application title",
         native_options,
-        Box::new(|_cc| Ok(Box::new(App::new()))),
+        Box::new(|cc| {
+            // Install system CJK fallback (YaHei on Windows, PingFang on macOS, etc.)
+            install_cjk_fallback(&cc.egui_ctx);
+
+            Ok(Box::new(App::new()))
+        }),
     )
 }
