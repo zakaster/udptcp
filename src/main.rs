@@ -25,6 +25,9 @@ mod udp;
 ///     run with cargo watch
 ///         cargo watch -w src/main.rs -x 'run'
 ///
+/// build x64 exe from macoso
+///     cargo build --release --target x86_64-pc-windows-gnu
+///
 struct App {
     netif_vec: Vec<Netif>,
     netif_selected: usize, // index in dropdown
